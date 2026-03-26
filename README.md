@@ -59,31 +59,31 @@ Database bootstrap and seed logic live in:
 Run the development server:
 
 ```bash
-cmd /c npm run dev
+npm run dev
 ```
 
 Build for production:
 
 ```bash
-cmd /c npm run build
+npm run build
 ```
 
 Run lint:
 
 ```bash
-cmd /c npm run lint
+npm run lint
 ```
 
 Initialize the database:
 
 ```bash
-cmd /c npm run db:init
+npm run db:init
 ```
 
 Force reseed the database:
 
 ```bash
-cmd /c npm run db:seed
+npm run db:seed
 ```
 
 ## Main Routes
