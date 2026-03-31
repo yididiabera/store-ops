@@ -1,29 +1,31 @@
 {
-  "name": "cake-shop-demo",
+  "name": "store-ops",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "db:init": "tsx scripts/init-db.ts",
-    "db:seed": "tsx scripts/init-db.ts --force"
-  },
-  "dependencies": {
-    "next": "16.2.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "dev": "npm --workspace apps/web run dev",
+    "dev:all": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:api": "npm --workspace apps/api run dev",
+    "build": "npm run build:web && npm run build:api",
+    "build:web": "npm --workspace apps/web run build",
+    "build:api": "npm --workspace apps/api run build",
+    "start": "npm --workspace apps/web run start",
+    "start:web": "npm --workspace apps/web run start",
+    "start:api": "npm --workspace apps/api run start",
+    "lint": "npm --workspace apps/web run lint",
+    "typecheck:api": "npm --workspace apps/api run typecheck",
+    "db:check:api": "npm --workspace apps/api run db:check",
+    "db:migrate:api": "npm --workspace apps/api run db:migrate",
+    "db:seed:api": "npm --workspace apps/api run db:seed",
+    "db:init": "npm --workspace apps/web run db:init",
+    "db:seed": "npm --workspace apps/web run db:seed"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.1",
-    "tailwindcss": "^4",
-    "tsx": "^4.21.0",
-    "typescript": "^5"
+    "concurrently": "^9.2.1"
   }
 }

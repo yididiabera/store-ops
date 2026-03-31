@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: store-ops-api
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install && npm run build:api
+    preDeployCommand: npm run db:migrate:api
+    startCommand: npm run start:api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 4000
+      - key: CORS_ORIGIN
+        sync: false
+      - key: DATABASE_URL
+        sync: false

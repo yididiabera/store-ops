@@ -1,7 +1,7 @@
 # Store Ops
 
-A full-stack retail operations demo built with Next.js.  
-This repo currently showcases a bakery/cake-shop management workflow, but the structure is general enough to extend into a broader store operations system.
+A full-stack retail operations demo built as a monorepo.  
+It currently showcases a bakery/cake-shop management workflow, but the structure is general enough to extend into a broader store operations system.
 
 ## What It Includes
 
@@ -13,46 +13,37 @@ This repo currently showcases a bakery/cake-shop management workflow, but the st
 
 ## Stack
 
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- SQLite via Node `node:sqlite`
+- `apps/web`: Next.js 16, React 19, TypeScript, Tailwind CSS 4
+- `apps/api`: Fastify, TypeScript, `pg`
+- Database: Supabase Postgres
 
 ## Project Structure
 
-### Frontend
+### Monorepo
+
+- `apps/web`
+  - Next.js frontend app
+- `apps/api`
+  - Standalone Fastify backend
+- `packages/shared`
+  - Shared workspace for future types/validation
+
+### Web App Structure (`apps/web`)
 
 - `src/app`
   - App routes and page entrypoints
 - `src/components`
   - Reusable UI components
+### API Structure (`apps/api`)
 
-### Backend
-
-- `src/server/db`
-  - Database connection, schema initialization, and seed/bootstrap logic
-- `src/server/dashboard`
-  - Dashboard read-model queries
-- `src/server/products`
-  - Product repository and business logic
-- `src/server/orders`
-  - Order repository and business logic
-- `src/server/sales`
-  - Sales read-model queries
-- `src/server/shared`
-  - Shared server constants, types, and formatting helpers
-
-## Database
-
-The app uses a local SQLite database stored at:
-
-- `data/veloura-cakes.db`
-
-Database bootstrap and seed logic live in:
-
-- `src/server/db/index.ts`
-- `scripts/init-db.ts`
+- `src/routes`
+  - Fastify route registration
+- `src/modules`
+  - Feature repositories and services
+- `src/db`
+  - Postgres connection and transaction helpers
+- `sql`
+  - Schema and seed SQL
 
 ## Scripts
 
@@ -60,6 +51,12 @@ Run the development server:
 
 ```bash
 npm run dev
+```
+
+Run web and API together:
+
+```bash
+npm run dev:all
 ```
 
 Build for production:
@@ -74,16 +71,22 @@ Run lint:
 npm run lint
 ```
 
-Initialize the database:
+Check the API database connection:
 
 ```bash
-npm run db:init
+npm run db:check:api
 ```
 
-Force reseed the database:
+Apply the API schema:
 
 ```bash
-npm run db:seed
+npm run db:migrate:api
+```
+
+Seed the API database:
+
+```bash
+npm run db:seed:api
 ```
 
 ## Main Routes
@@ -95,12 +98,72 @@ npm run db:seed
 - `/orders/[id]`
 - `/sales`
 
-## Development Notes
+## Environment Setup
 
-- Route-local server actions stay in `src/app/.../actions.ts`
-- Repositories handle SQL and raw data access
-- Feature `index.ts` modules handle business logic and orchestration
-- The current backend is designed to stay inside one Next.js app, not as a separate API service
+### API
+
+Create `apps/api/.env` from [apps/api/.env.example](C:\Users\Jedidiah\OneDrive\Desktop\Projects\cake shop\apps\api\.env.example):
+
+```bash
+API_HOST=0.0.0.0
+PORT=4000
+CORS_ORIGIN=http://localhost:3000
+DATABASE_URL=postgresql://postgres:YOUR_DB_PASSWORD@aws-0-us-west-1.pooler.supabase.com:6543/postgres
+```
+
+Use the Supabase transaction pooler URI.
+
+### Web
+
+Create `apps/web/.env` from [apps/web/.env.example](C:\Users\Jedidiah\OneDrive\Desktop\Projects\cake shop\apps\web\.env.example):
+
+```bash
+STORE_OPS_API_URL=http://127.0.0.1:4000
+```
+
+The web app will then read and write through the standalone API.
+
+## Deployment
+
+Recommended setup:
+
+- frontend: Vercel
+- backend: Render
+- database: Supabase Postgres
+
+### Render (API)
+
+The repo includes [render.yaml](C:\Users\Jedidiah\OneDrive\Desktop\Projects\cake shop\render.yaml) for the API service.
+
+Set these environment variables in Render:
+
+- `DATABASE_URL`
+  - Supabase transaction pooler URI
+- `CORS_ORIGIN`
+  - your Vercel frontend URL
+
+Render will:
+
+- build with `npm run build:api`
+- run migrations before deploy
+- start the API with `npm run start:api`
+
+After the first deploy, seed demo data manually once:
+
+```bash
+npm run db:seed:api
+```
+
+### Vercel (Web)
+
+Create a Vercel project using:
+
+- root directory: `apps/web`
+
+Set:
+
+- `STORE_OPS_API_URL`
+  - your Render API URL, for example `https://store-ops-api.onrender.com`
 
 ## Docs
 
@@ -109,4 +172,5 @@ npm run db:seed
 
 ## Notes
 
-- `node:sqlite` is currently marked experimental by Node, so you may see a warning in local runs
+- The API path is the intended deployed path.
+- Some internal SQLite fallback code still exists in `apps/web` for local safety, but production should point to `apps/api`.
